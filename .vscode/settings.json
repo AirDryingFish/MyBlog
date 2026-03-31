@@ -1,0 +1,11 @@
+{
+    "frontMatter.framework.id": "hugo",
+    "frontMatter.content.publicFolder": "static",
+    "frontMatter.content.pageFolders": [
+        {
+            "title": "posts",
+            "path": "[[workspace]]/content/posts"
+        }
+    ],
+    "frontMatter.git.enabled": true
+}

@@ -2,9 +2,13 @@
 title: "🐍 Python 学习笔记 #1：从零开始"
 date: 2026-03-29
 draft: false
-tags: ["Python", "编程", "入门"]
-categories: ["技术学习"]
-summary: "Python 基础语法学习记录，变量、数据类型、条件判断 ✦"
+tags:
+    - Python
+    - 编程
+    - 入门
+categories:
+    - 技术学习
+summary: Python 基础语法学习记录，变量、数据类型、条件判断 ✦
 showtoc: true
 ---
 
