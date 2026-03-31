@@ -1,0 +1,495 @@
+/* ═══════════════════════════════════════════════════
+   Custom Theme — PaperMod Override
+   NOTE: PaperMod uses [data-theme="dark"] attribute,
+         NOT a .dark class selector.
+   ═══════════════════════════════════════════════════ */
+
+/* Fonts loaded via <link> in extend_head.html to avoid @import ordering issues */
+
+/* ── Global Accent Colors (theme-independent) ── */
+:root {
+  --a1: #7b77ff;
+  --a2: #be7bff;
+  --a3: #00e5ff;
+  --a4: #3dffa0;
+  --g1: rgba(123, 119, 255, 0.22);
+  --g2: rgba(190, 123, 255, 0.18);
+  --g3: rgba(0, 229, 255, 0.18);
+
+  /* ── Light Theme defaults ── */
+  --theme:    #f4f6ff;
+  --entry:    #ffffff;
+  --primary:  #1a1f3c;
+  --secondary:#5a6482;
+  --tertiary: #edf0ff;
+  --content:  #2d3459;
+  --hljs-bg:  #f4f6ff;
+  --code-bg:  #edf0ff;
+  --border:   #d8ddf5;
+  --nav-bg:   rgba(244, 246, 255, 0.92);
+  --hero-bg:  linear-gradient(135deg, rgba(123,119,255,0.06), rgba(190,123,255,0.04), rgba(0,229,255,0.05));
+}
+
+/* ── Dark Theme ── */
+:root[data-theme="dark"] {
+  --theme:    #080c14;
+  --entry:    #0d1421;
+  --primary:  #dde6f5;
+  --secondary:#6e82a4;
+  --tertiary: #121c30;
+  --content:  #c5d3e8;
+  --hljs-bg:  #0d1421;
+  --code-bg:  #0d1421;
+  --border:   #1e2e4a;
+  --nav-bg:   rgba(8, 12, 20, 0.9);
+  --hero-bg:  linear-gradient(135deg, rgba(123,119,255,0.1), rgba(190,123,255,0.07), rgba(0,229,255,0.08));
+  color-scheme: dark;
+}
+
+/* ── Base ── */
+body {
+  font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.85;
+  overflow-x: hidden;
+}
+
+/* UI 元素用黑体保持清晰 */
+.nav, #menu, .toc, .archive-year, .breadcrumbs, .footer,
+.entry-footer, .post-meta {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-weight: 500;
+}
+
+/* ── Starfield — dark mode only ── */
+:root[data-theme="dark"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(1.5px 1.5px at  8% 18%, var(--a1) 50%, transparent 50%),
+    radial-gradient(1px   1px   at 22% 42%, var(--a2) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 38% 12%, var(--a3) 50%, transparent 50%),
+    radial-gradient(1px   1px   at 53% 68%, var(--a1) 50%, transparent 50%),
+    radial-gradient(2px   2px   at 68% 33%, var(--a2) 50%, transparent 50%),
+    radial-gradient(1px   1px   at 83% 58%, var(--a3) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 13% 78%, var(--a2) 50%, transparent 50%),
+    radial-gradient(1px   1px   at 58% 88%, var(--a1) 50%, transparent 50%),
+    radial-gradient(2px   2px   at 91% 8%,  var(--a3) 50%, transparent 50%),
+    radial-gradient(1px   1px   at 33% 53%, var(--a1) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 78% 83%, var(--a2) 50%, transparent 50%),
+    radial-gradient(1px   1px   at 72% 22%, var(--a1) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 17% 48%, var(--a3) 50%, transparent 50%),
+    radial-gradient(2px   2px   at 44% 72%, var(--a2) 50%, transparent 50%);
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  0%   { opacity: 0.45; }
+  100% { opacity: 0.85; }
+}
+
+/* ── Custom Cursor ── */
+/* 默认：靛蓝箭头；可点击：青色箭头 */
+@media (pointer: fine) {
+  * {
+    cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='22' viewBox='0 0 20 22'><path d='M3 1L3 17L7 13L10 20L13 18.5L10 11.5L16.5 11.5Z' fill='%237b77ff' stroke='white' stroke-width='1.2' stroke-linejoin='round' paint-order='stroke'/></svg>") 3 1, auto !important;
+  }
+  a, button, [role="button"], label, summary,
+  input[type="submit"], input[type="button"],
+  input[type="checkbox"], input[type="radio"],
+  select, .post-entry {
+    cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='22' viewBox='0 0 20 22'><path d='M3 1L3 17L7 13L10 20L13 18.5L10 11.5L16.5 11.5Z' fill='%2300e5ff' stroke='white' stroke-width='1.2' stroke-linejoin='round' paint-order='stroke'/></svg>") 3 1, pointer !important;
+  }
+  input[type="text"], input[type="search"],
+  input[type="email"], textarea {
+    cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='22' viewBox='0 0 20 22'><path d='M3 1L3 17L7 13L10 20L13 18.5L10 11.5L16.5 11.5Z' fill='%237b77ff' stroke='white' stroke-width='1.2' stroke-linejoin='round' paint-order='stroke'/></svg>") 3 1, text !important;
+  }
+}
+
+/* ── Click Ripple ── */
+.click-ripple {
+  position: fixed;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--a1);
+  pointer-events: none;
+  z-index: 99990;
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple-expand var(--dur, 500ms) ease-out forwards;
+}
+
+@keyframes ripple-expand {
+  0%   { transform: translate(-50%, -50%) scale(0);              opacity: 0.9; border-color: var(--a2); }
+  50%  { opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(var(--scale, 3)); opacity: 0;   border-color: var(--a3); }
+}
+
+/* ── Nav ── */
+.nav {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: var(--nav-bg) !important;
+  border-bottom: 1px solid var(--border) !important;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+/* FIX: overflow-x:auto on #menu causes scrollbar flicker when
+   ::after underline animates — switch to visible */
+#menu {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+
+#menu a {
+  position: relative;
+  font-weight: 500;
+  transition: color 0.25s ease;
+  letter-spacing: 0.02em;
+}
+
+#menu a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--a1), var(--a2));
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+
+#menu a:hover::after { width: 100%; }
+
+/* Remove PaperMod's default active border-bottom, use our ::after underline instead */
+#menu .active {
+  border-bottom: none !important;
+}
+#menu .active::after { width: 100%; }
+
+#menu a:hover { color: var(--a1) !important; }
+
+/* Logo — static, clean */
+.nav .logo a {
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: color 0.25s ease;
+}
+
+.nav .logo a:hover {
+  color: var(--a1);
+}
+
+/* ── Hero / Home Info ── */
+.first-entry.home-info {
+  background: var(--hero-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  padding: 3rem 3.5rem !important;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  animation: fadeInUp 0.7s ease-out;
+  min-height: unset !important;
+}
+
+.first-entry.home-info::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3), var(--a4));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+.first-entry.home-info::after {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--g2), transparent 65%);
+  pointer-events: none;
+  animation: orb-drift 8s ease-in-out infinite alternate;
+}
+
+@keyframes orb-drift {
+  0%   { transform: translate(0,0) scale(1); }
+  50%  { transform: translate(-20px, 20px) scale(1.1); }
+  100% { transform: translate(10px, -15px) scale(0.95); }
+}
+
+.first-entry.home-info .entry-header h1 {
+  font-size: 2rem !important;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.3 !important;
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.01em;
+}
+
+.first-entry.home-info .entry-content {
+  font-size: 1rem !important;
+  line-height: 1.85;
+  color: var(--secondary);
+  -webkit-line-clamp: unset !important;
+  border-top: 1px solid var(--border);
+  padding-top: 1.2rem;
+  margin-top: 0.6rem;
+}
+
+.first-entry.home-info .entry-footer {
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Post Cards ── */
+.post-entry {
+  border: 1px solid var(--border) !important;
+  border-radius: 14px !important;
+  background: var(--entry);
+  transition:
+    transform    0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.3s ease,
+    box-shadow   0.35s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.post-entry::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(123,119,255,0.06) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+.post-entry:hover::before { transform: translateX(100%); }
+
+.post-entry:hover {
+  transform: translateY(-5px) scale(1.005);
+  border-color: var(--a1) !important;
+  box-shadow: 0 12px 32px var(--g1), 0 0 0 1px rgba(123,119,255,0.1);
+}
+
+.post-entry .entry-header h2 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  transition: color 0.25s;
+}
+.post-entry:hover .entry-header h2 { color: var(--a1); }
+
+/* ── Tags ── */
+.post-tags a {
+  background: rgba(123,119,255,0.08);
+  border: 1px solid rgba(123,119,255,0.22);
+  border-radius: 20px;
+  padding: 2px 12px;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  transition: all 0.25s ease;
+  color: var(--a2);
+}
+.post-tags a:hover {
+  background: var(--a1);
+  border-color: var(--a1);
+  color: #fff;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 14px var(--g1);
+}
+
+/* ── Single Post ── */
+.post-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.post-content h2 {
+  padding-left: 16px;
+  border-left: 3px solid var(--a1);
+  color: var(--primary);
+  transition: border-color 0.3s;
+}
+.post-content h2:hover { border-color: var(--a2); }
+
+.post-content h3::before {
+  content: '▸ ';
+  color: var(--a3);
+}
+
+.post-content blockquote {
+  border-left: 3px solid var(--a2);
+  background: rgba(123,119,255,0.05);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 22px;
+  margin: 1.4em 0;
+}
+
+/* Code blocks */
+.post-content pre {
+  border-radius: 12px !important;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.post-content pre::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+.post-content code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.89em;
+}
+
+.post-content :not(pre) > code {
+  background: rgba(123,119,255,0.1);
+  border: 1px solid rgba(123,119,255,0.2);
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--a2);
+  font-size: 0.87em;
+}
+
+.post-content a {
+  color: var(--a3);
+  text-decoration: none;
+  position: relative;
+  transition: color 0.25s;
+}
+.post-content a::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0;
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, var(--a3), var(--a2));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.28s ease;
+}
+.post-content a:hover { color: var(--a2); }
+.post-content a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* ── TOC ── */
+.toc {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--entry);
+  position: relative;
+  overflow: hidden;
+}
+.toc::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+.toc summary { font-weight: 700; color: var(--a2); }
+
+/* ── Breadcrumbs ── */
+.breadcrumbs a { color: var(--a1); transition: color 0.2s; }
+.breadcrumbs a:hover { color: var(--a2); }
+
+/* ── Archive ── */
+.archive-year { color: var(--a1); font-weight: 700; }
+
+/* ── Footer ── */
+.footer { border-top: 1px solid var(--border); position: relative; }
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--a1), var(--a2), var(--a3), transparent);
+}
+
+/* ── Scroll to Top ── */
+#top-link {
+  background: linear-gradient(135deg, var(--a1), var(--a2)) !important;
+  border: none !important;
+  box-shadow: 0 4px 16px var(--g1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#top-link:hover {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 8px 28px var(--g1);
+}
+
+/* ── Theme Toggle ── */
+#theme-toggle { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+#theme-toggle:hover { transform: rotate(25deg) scale(1.15); }
+
+/* ── Selection ── */
+::selection { background: rgba(123,119,255,0.28); color: inherit; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--theme); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--a1), var(--a2));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--a2), var(--a3));
+}
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.main { animation: fadeInUp 0.4s ease-out; }
+.main .post-entry                 { animation: fadeInUp 0.4s ease-out both; }
+.main .post-entry:nth-child(2)    { animation-delay: 0.06s; }
+.main .post-entry:nth-child(3)    { animation-delay: 0.12s; }
+.main .post-entry:nth-child(4)    { animation-delay: 0.18s; }
+.main .post-entry:nth-child(5)    { animation-delay: 0.24s; }
+.main .post-entry:nth-child(6)    { animation-delay: 0.30s; }
+
+/* ── Post Nav ── */
+.paginav a {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.28s ease;
+}
+.paginav a:hover {
+  border-color: var(--a1);
+  background: rgba(123,119,255,0.06);
+  transform: scale(1.02);
+}
+
+/* ── Social Icons ── */
+.social-icons a { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.25s; }
+.social-icons a:hover {
+  color: var(--a1) !important;
+  transform: translateY(-3px) scale(1.18);
+}
+.social-icons a:hover svg { filter: drop-shadow(0 2px 8px var(--g1)); }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .first-entry.home-info { padding: 2rem 1.8rem !important; }
+  .first-entry.home-info .entry-header h1 { font-size: 1.6rem !important; }
+}
