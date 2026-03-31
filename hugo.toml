@@ -1,12 +1,14 @@
 baseURL = "https://your-site.pages.dev"
 languageCode = "zh-cn"
 title = "学习基地"
-paginate = 8
 theme = "PaperMod"
 enableRobotsTXT = true
 buildDrafts = false
 buildFuture = false
 buildExpired = false
+
+[pagination]
+  paginate = 8
 
 [minify]
   disableXML = true
@@ -14,7 +16,7 @@ buildExpired = false
 
 [params]
   env = "production"
-  title = "学习基地"
+  title = "fgyblog"
   description = "记录技术探索与学习过程中的思考与收获"
   keywords = ["学习笔记", "博客", "技术"]
   author = "Blog"
@@ -38,7 +40,7 @@ buildExpired = false
   tocopen = false
 
   [params.homeInfoParams]
-    Title = "ようこそ — 欢迎"
+    Title = "Welcome 欢迎"
     Content = """
 这里记录着技术探索与学习的思考与收获。\n
 每一篇文章都是知识积累的一部分。
@@ -54,7 +56,7 @@ buildExpired = false
     hiddenInSingle = false
 
   [params.label]
-    text = "学习基地"
+    text = "fgyblog"
     iconHeight = 35
 
 [taxonomies]
