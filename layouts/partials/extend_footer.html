@@ -1,24 +1,115 @@
 <script>
 (function () {
-  if (!window.matchMedia('(pointer: fine)').matches) return;
+  var isFine = window.matchMedia('(pointer: fine)').matches;
 
-  /* 点击涟漪 */
-  document.addEventListener('mousedown', function (e) {
-    for (var i = 0; i < 3; i++) {
-      (function (i) {
-        setTimeout(function () {
-          var el = document.createElement('div');
-          el.className = 'click-ripple';
-          el.style.left = e.clientX + 'px';
-          el.style.top  = e.clientY + 'px';
-          el.style.animationDelay = '0ms';
-          el.style.setProperty('--scale', 2.5 + i * 1.2 + '');
-          el.style.setProperty('--dur',   (400 + i * 120) + 'ms');
-          document.body.appendChild(el);
-          el.addEventListener('animationend', function () { el.remove(); });
-        }, i * 60);
-      })(i);
-    }
+  /* ══════════════════════════════════════════
+     1. Scroll Reveal — 滚动渐入
+     ══════════════════════════════════════════ */
+  var reveals = document.querySelectorAll('.post-entry, .first-entry');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e, i) {
+        if (e.isIntersecting) {
+          /* 交错延迟 */
+          var delay = Array.prototype.indexOf.call(reveals, e.target) * 60;
+          setTimeout(function () { e.target.classList.add('revealed'); }, delay);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    reveals.forEach(function (el) { io.observe(el); });
+  } else {
+    reveals.forEach(function (el) { el.classList.add('revealed'); });
+  }
+
+  /* ══════════════════════════════════════════
+     2. Card Glow — 卡片鼠标追踪光晕
+     ══════════════════════════════════════════ */
+  if (isFine) {
+    document.querySelectorAll('.post-entry').forEach(function (card) {
+      var glow = document.createElement('div');
+      glow.className = 'card-glow';
+      card.appendChild(glow);
+
+      card.addEventListener('mousemove', function (e) {
+        var r = card.getBoundingClientRect();
+        var x = e.clientX - r.left;
+        var y = e.clientY - r.top;
+        glow.style.background =
+          'radial-gradient(300px circle at ' + x + 'px ' + y + 'px, var(--card-glow), transparent 60%)';
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════
+     3. Click Effects — 涟漪 + 粒子火花
+     ══════════════════════════════════════════ */
+  if (isFine) {
+    document.addEventListener('mousedown', function (e) {
+      var cx = e.clientX, cy = e.clientY;
+
+      /* 扩散环 x2 */
+      for (var i = 0; i < 2; i++) {
+        (function (i) {
+          setTimeout(function () {
+            var ring = document.createElement('div');
+            ring.className = 'click-ripple';
+            ring.style.left = cx + 'px';
+            ring.style.top  = cy + 'px';
+            ring.style.setProperty('--scale', 2.5 + i * 1.5 + '');
+            ring.style.setProperty('--dur', (400 + i * 140) + 'ms');
+            document.body.appendChild(ring);
+            ring.addEventListener('animationend', function () { ring.remove(); });
+          }, i * 50);
+        })(i);
+      }
+
+      /* 粒子火花 x6 */
+      for (var j = 0; j < 6; j++) {
+        (function () {
+          var angle = Math.random() * Math.PI * 2;
+          var dist  = 30 + Math.random() * 40;
+          var spark = document.createElement('div');
+          spark.className = 'click-spark';
+          spark.style.left = cx + 'px';
+          spark.style.top  = cy + 'px';
+          spark.style.background = ['var(--a1)', 'var(--a2)', 'var(--a3)'][Math.floor(Math.random() * 3)];
+          spark.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
+          spark.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
+          spark.style.setProperty('--dur', (300 + Math.random() * 300) + 'ms');
+          document.body.appendChild(spark);
+          spark.addEventListener('animationend', function () { spark.remove(); });
+        })();
+      }
+    });
+  }
+
+  /* ══════════════════════════════════════════
+     4. View Toggle — 列表 / 卡片切换
+     ══════════════════════════════════════════ */
+  var container = document.getElementById('posts-container');
+  var toggleWrap = document.getElementById('view-toggle');
+  if (!container || !toggleWrap) return;
+
+  var saved = localStorage.getItem('view-mode') || 'list';
+
+  function setView(mode) {
+    container.classList.toggle('grid-view', mode === 'grid');
+    var btns = toggleWrap.querySelectorAll('.view-btn');
+    btns.forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-view') === mode);
+    });
+    localStorage.setItem('view-mode', mode);
+  }
+
+  setView(saved);
+
+  /* 事件委托：点击 SVG 子元素也能正确触发 */
+  toggleWrap.addEventListener('click', function (e) {
+    var btn = e.target.closest('.view-btn');
+    if (!btn) return;
+    e.stopPropagation();
+    setView(btn.getAttribute('data-view'));
   });
 })();
 </script>
