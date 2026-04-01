@@ -46,5 +46,5 @@
       ]
     }
   ],
-  "frontMatter.preview.host": "https://myblog-8r2.pages.dev/posts"
+  "frontMatter.preview.host": "http://localhost:1313/posts"
 }

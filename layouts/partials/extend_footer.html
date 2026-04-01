@@ -3,52 +3,45 @@
   var isFine = window.matchMedia('(pointer: fine)').matches;
 
   /* ══════════════════════════════════════════
-     1. Scroll Reveal — 滚动渐入
-     ══════════════════════════════════════════ */
-  var reveals = document.querySelectorAll('.post-entry, .first-entry');
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e, i) {
-        if (e.isIntersecting) {
-          /* 交错延迟 */
-          var delay = Array.prototype.indexOf.call(reveals, e.target) * 60;
-          setTimeout(function () { e.target.classList.add('revealed'); }, delay);
-          io.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.08 });
-    reveals.forEach(function (el) { io.observe(el); });
-  } else {
-    reveals.forEach(function (el) { el.classList.add('revealed'); });
-  }
-
-  /* ══════════════════════════════════════════
-     2. Card Glow — 卡片鼠标追踪光晕
+     0. Custom Cursor — DOM 光标跟随
      ══════════════════════════════════════════ */
   if (isFine) {
-    document.querySelectorAll('.post-entry').forEach(function (card) {
-      var glow = document.createElement('div');
-      glow.className = 'card-glow';
-      card.appendChild(glow);
+    var NORMAL = '#7b77ff', HOVER = '#00e5ff';
+    var cc = document.getElementById('cc');
+    if (!cc) {
+      cc = document.createElement('div');
+      cc.id = 'cc';
+      cc.style.cssText = 'position:fixed;z-index:99999;pointer-events:none;will-change:transform;display:none';
+      cc.innerHTML = '<svg width="20" height="22" viewBox="0 0 20 22" xmlns="http://www.w3.org/2000/svg"><path d="M3 1L3 17L7 13L10 20L13 18.5L10 11.5L16.5 11.5Z" fill="' + NORMAL + '" stroke="white" stroke-width="1.2" stroke-linejoin="round" paint-order="stroke"/></svg>';
+      document.body.appendChild(cc);
+    }
+    var ccPath = cc.querySelector('path');
+    var isHover = false;
 
-      card.addEventListener('mousemove', function (e) {
-        var r = card.getBoundingClientRect();
-        var x = e.clientX - r.left;
-        var y = e.clientY - r.top;
-        glow.style.background =
-          'radial-gradient(300px circle at ' + x + 'px ' + y + 'px, var(--card-glow), transparent 60%)';
-      });
+    document.addEventListener('mousemove', function (e) {
+      cc.style.display = '';
+      cc.style.left = e.clientX + 'px';
+      cc.style.top = e.clientY + 'px';
+      sessionStorage.setItem('_cp', JSON.stringify([e.clientX, e.clientY, isHover ? 1 : 0]));
     });
+    document.addEventListener('mouseover', function (e) {
+      var t = e.target.closest('a,button,[role="button"],label,summary,select,.post-entry,input[type="submit"],input[type="button"],.tax-btn');
+      if (t && !isHover) { isHover = true; ccPath.setAttribute('fill', HOVER); }
+    });
+    document.addEventListener('mouseout', function (e) {
+      var t = e.target.closest('a,button,[role="button"],label,summary,select,.post-entry,input[type="submit"],input[type="button"],.tax-btn');
+      if (t && isHover) { isHover = false; ccPath.setAttribute('fill', NORMAL); }
+    });
+    document.addEventListener('mouseleave', function () { cc.style.display = 'none'; });
+    document.addEventListener('mouseenter', function () { cc.style.display = ''; });
   }
 
   /* ══════════════════════════════════════════
-     3. Click Effects — 涟漪 + 粒子火花
+     1. Click Effects — 涟漪 + 粒子火花
      ══════════════════════════════════════════ */
   if (isFine) {
     document.addEventListener('mousedown', function (e) {
       var cx = e.clientX, cy = e.clientY;
-
-      /* 扩散环 x2 */
       for (var i = 0; i < 2; i++) {
         (function (i) {
           setTimeout(function () {
@@ -63,8 +56,6 @@
           }, i * 50);
         })(i);
       }
-
-      /* 粒子火花 x6 */
       for (var j = 0; j < 6; j++) {
         (function () {
           var angle = Math.random() * Math.PI * 2;
@@ -85,31 +76,186 @@
   }
 
   /* ══════════════════════════════════════════
-     4. View Toggle — 列表 / 卡片切换
+     2. Header Hide/Show — 滚动方向隐藏导航栏
      ══════════════════════════════════════════ */
-  var container = document.getElementById('posts-container');
-  var toggleWrap = document.getElementById('view-toggle');
-  if (!container || !toggleWrap) return;
-
-  var saved = localStorage.getItem('view-mode') || 'list';
-
-  function setView(mode) {
-    container.classList.toggle('grid-view', mode === 'grid');
-    var btns = toggleWrap.querySelectorAll('.view-btn');
-    btns.forEach(function (b) {
-      b.classList.toggle('active', b.getAttribute('data-view') === mode);
+  var header = document.querySelector('.header');
+  if (header) {
+    var lastY = window.scrollY;
+    window.addEventListener('scroll', function () {
+      requestAnimationFrame(function () {
+        var y = window.scrollY;
+        if (y > lastY && y > 60) {
+          header.classList.add('nav-hidden');
+        } else {
+          header.classList.remove('nav-hidden');
+        }
+        lastY = y;
+      });
     });
-    localStorage.setItem('view-mode', mode);
   }
 
-  setView(saved);
+  /* ══════════════════════════════════════════
+     3. initPage — 每次内容变化后重新初始化
+     ══════════════════════════════════════════ */
+  function initPage() {
+    /* Scroll Reveal */
+    var els = document.querySelectorAll('.post-entry:not(.revealed), .first-entry:not(.revealed)');
+    if ('IntersectionObserver' in window && els.length) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            var d = Array.prototype.indexOf.call(els, e.target) * 60;
+            setTimeout(function () { e.target.classList.add('revealed'); }, d);
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.08 });
+      els.forEach(function (el) { io.observe(el); });
+    } else {
+      els.forEach(function (el) { el.classList.add('revealed'); });
+    }
 
-  /* 事件委托：点击 SVG 子元素也能正确触发 */
-  toggleWrap.addEventListener('click', function (e) {
-    var btn = e.target.closest('.view-btn');
-    if (!btn) return;
-    e.stopPropagation();
-    setView(btn.getAttribute('data-view'));
+    /* Card Glow */
+    if (isFine) {
+      document.querySelectorAll('.post-entry:not([data-glow])').forEach(function (card) {
+        card.setAttribute('data-glow', '1');
+        var glow = document.createElement('div');
+        glow.className = 'card-glow';
+        card.appendChild(glow);
+        card.addEventListener('mousemove', function (e) {
+          var r = card.getBoundingClientRect();
+          glow.style.background = 'radial-gradient(300px circle at ' + (e.clientX - r.left) + 'px ' + (e.clientY - r.top) + 'px, var(--card-glow), transparent 60%)';
+        });
+      });
+    }
+
+    /* View Toggle */
+    var ctn = document.getElementById('posts-container');
+    var tog = document.getElementById('view-toggle');
+    if (ctn && tog && !tog.hasAttribute('data-init')) {
+      tog.setAttribute('data-init', '1');
+      var sv = localStorage.getItem('view-mode') || 'list';
+      function setV(m) {
+        ctn.classList.toggle('grid-view', m === 'grid');
+        tog.querySelectorAll('.view-btn').forEach(function (b) {
+          b.classList.toggle('active', b.getAttribute('data-view') === m);
+        });
+        localStorage.setItem('view-mode', m);
+      }
+      setV(sv);
+      tog.addEventListener('click', function (e) {
+        var btn = e.target.closest('.view-btn');
+        if (btn) { e.stopPropagation(); setV(btn.getAttribute('data-view')); }
+      });
+    }
+
+    /* Sidebar TOC */
+    var ts = document.getElementById('toc-sidebar');
+    if (ts) {
+      var tl = ts.querySelectorAll('a[href^="#"]');
+      if (tl.length) {
+        var hm = [];
+        tl.forEach(function (l) {
+          var el = document.getElementById(decodeURIComponent(l.getAttribute('href').slice(1)));
+          if (el) hm.push({ el: el, link: l });
+        });
+        function upToc() {
+          var sy = window.scrollY, act = null;
+          for (var i = 0; i < hm.length; i++) {
+            if (hm[i].el.getBoundingClientRect().top + sy - 120 <= sy) act = hm[i];
+          }
+          tl.forEach(function (l) { l.classList.remove('toc-active'); });
+          if (act) {
+            act.link.classList.add('toc-active');
+            var lt = act.link.offsetTop, sh = ts.clientHeight;
+            if (lt < ts.scrollTop || lt > ts.scrollTop + sh - 40)
+              ts.scrollTo({ top: lt - sh / 3, behavior: 'smooth' });
+          }
+        }
+        window.addEventListener('scroll', function tocScroll() {
+          requestAnimationFrame(upToc);
+        });
+        upToc();
+      }
+    }
+
+    /* Execute inline scripts in <main> (for taxonomy pages etc.) */
+    document.querySelectorAll('main.main script:not([src])').forEach(function (s) {
+      if (s.getAttribute('data-exec')) return;
+      s.setAttribute('data-exec', '1');
+    });
+  }
+
+  initPage();
+
+  /* ══════════════════════════════════════════
+     4. SPA Navigation — 无刷新页面切换
+     ══════════════════════════════════════════ */
+  if (!window.fetch || !window.DOMParser || !window.history.pushState) return;
+
+  var prefetchCache = {};
+
+  document.addEventListener('mouseover', function (e) {
+    var a = e.target.closest('a[href]');
+    if (!a || a.origin !== location.origin || prefetchCache[a.href]) return;
+    prefetchCache[a.href] = fetch(a.href).then(function (r) { return r.text(); });
   });
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href]');
+    if (!a || a.origin !== location.origin || a.target ||
+        e.ctrlKey || e.metaKey || e.shiftKey || e.altKey ||
+        a.hasAttribute('download')) return;
+    if (a.pathname === location.pathname && a.hash) return;
+    if (/\/search\/?$/.test(a.pathname)) return;
+
+    e.preventDefault();
+    doNav(a.href, false);
+  });
+
+  window.addEventListener('popstate', function () {
+    doNav(location.href, true);
+  });
+
+  function doNav(url, isPop) {
+    var p = prefetchCache[url] || fetch(url).then(function (r) { return r.text(); });
+    delete prefetchCache[url];
+
+    p.then(function (html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+
+      document.title = doc.title;
+      document.body.className = doc.body.className;
+      document.body.id = doc.body.id || '';
+
+      var nm = doc.querySelector('main.main');
+      if (nm) document.querySelector('main.main').innerHTML = nm.innerHTML;
+
+      var nMenu = doc.getElementById('menu');
+      if (nMenu) document.getElementById('menu').innerHTML = nMenu.innerHTML;
+
+      var oldToc = document.getElementById('toc-sidebar');
+      var newToc = doc.getElementById('toc-sidebar');
+      if (oldToc) oldToc.remove();
+      if (newToc) {
+        var main = document.querySelector('main.main');
+        if (main) main.insertAdjacentElement('afterend', newToc);
+      }
+
+      if (!isPop) history.pushState({}, '', url);
+      window.scrollTo(0, 0);
+      if (header) header.classList.remove('nav-hidden');
+
+      /* re-exec inline scripts in <main> */
+      document.querySelectorAll('main.main script:not([src])').forEach(function (old) {
+        var ns = document.createElement('script');
+        ns.textContent = old.textContent;
+        old.parentNode.replaceChild(ns, old);
+      });
+
+      initPage();
+      prefetchCache = {};
+    });
+  }
 })();
 </script>

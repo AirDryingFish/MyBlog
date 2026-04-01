@@ -4,7 +4,10 @@
       "Bash(curl -s -L \"https://blowfish.page/docs/installation/\")",
       "Bash(curl -s -L \"https://blowfish.page/docs/getting-started/\")",
       "Bash(curl -s -L \"https://blowfish.page/docs/configuration/\")",
-      "Bash(hugo --gc)"
+      "Bash(hugo --gc)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -r \"sticky\\\\|\\\\.header\" E:/blog/MyBlog/themes/PaperMod/ --include=*.html)",
+      "WebFetch(domain:blog.cosine.ren)"
     ]
   }
 }

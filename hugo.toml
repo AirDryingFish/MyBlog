@@ -87,6 +87,12 @@ buildExpired = false
   url = "/categories/"
   weight = 40
 
+[[menu.main]]
+  identifier = "search"
+  name = "搜索"
+  url = "/search/"
+  weight = 50
+
 [markup]
   [markup.highlight]
     anchorLineNos = false

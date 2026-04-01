@@ -1,8 +1,6 @@
-# ✦ 杨的学习基地 ✦
+# ✦ 个人笔记仓库 ✦
 
 基于 Hugo + PaperMod 主题搭建，托管在 Cloudflare Pages。
-
-带有二次元风格的自定义 CSS 主题覆盖。
 
 ## 快速开始
 

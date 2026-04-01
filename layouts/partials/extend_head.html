@@ -1,3 +1,18 @@
+<style>@media(pointer:fine){*,*::before,*::after{cursor:none!important}}</style>
+<script>
+(function(){
+  if(!window.matchMedia||!matchMedia('(pointer:fine)').matches)return;
+  var pos=sessionStorage.getItem('_cp');
+  if(pos){
+    pos=JSON.parse(pos);
+    var c=document.createElement('div');
+    c.id='cc';
+    c.style.cssText='position:fixed;z-index:99999;pointer-events:none;left:'+pos[0]+'px;top:'+pos[1]+'px;will-change:transform';
+    c.innerHTML='<svg width="20" height="22" viewBox="0 0 20 22" xmlns="http://www.w3.org/2000/svg"><path d="M3 1L3 17L7 13L10 20L13 18.5L10 11.5L16.5 11.5Z" fill="'+(pos[2]?'#00e5ff':'#7b77ff')+'" stroke="white" stroke-width="1.2" stroke-linejoin="round" paint-order="stroke"/></svg>';
+    document.documentElement.appendChild(c);
+  }
+})();
+</script>
 <link rel="preconnect" href="https://fonts.loli.net">
 <link rel="preconnect" href="https://gstatic.loli.net" crossorigin>
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap">

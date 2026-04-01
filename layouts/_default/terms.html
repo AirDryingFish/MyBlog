@@ -1,0 +1,174 @@
+{{- define "main" }}
+
+{{- if .Title }}
+<header class="page-header tax-page-header">
+  {{- partial "breadcrumbs.html" . }}
+  <h1>{{ .Title }}</h1>
+  {{- if .Description }}
+  <div class="post-description">{{ .Description | markdownify }}</div>
+  {{- end }}
+</header>
+{{- end }}
+
+{{- $type  := .Type }}
+{{- $terms := .Data.Terms.Alphabetical }}
+
+{{- if not $terms }}
+<p class="tax-empty">暂无内容。</p>
+{{- else }}
+
+{{/* ── Filter bar ── */}}
+<nav class="tax-filter-bar" aria-label="{{ .Title }} 筛选">
+  <div class="tax-filter" id="tax-filter">
+    {{- range $terms }}
+    <button class="tax-btn" data-term="{{ .Name }}" type="button">
+      <span class="tax-btn-label">{{ .Name }}</span>
+      <span class="tax-btn-badge">{{ .Count }}</span>
+    </button>
+    {{- end }}
+  </div>
+</nav>
+
+{{/* ── Content stage ── */}}
+<div id="tax-stage">
+  {{- range $terms }}
+  {{- $name  := .Name }}
+  {{- $count := .Count }}
+  {{- with site.GetPage (printf "/%s/%s" $type $name) }}
+  <section class="tax-group" data-group="{{ $name }}">
+
+    <div class="tax-section-hd">
+      <span class="tax-section-name">{{ $name }}</span>
+      <span class="tax-section-badge">{{ $count }} 篇</span>
+      <span class="tax-section-rule" aria-hidden="true"></span>
+    </div>
+
+    <div class="posts-container grid-view">
+      {{- range .Pages }}
+      <article class="post-entry{{ if .Params.weight }} pinned{{ end }}" data-no-reveal>
+        {{- if .Params.weight }}
+        <span class="pin-badge" title="置顶">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+               fill="currentColor"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2z"/></svg>
+          置顶
+        </span>
+        {{- end }}
+        {{- $isHidden := (.Param "cover.hiddenInList") | default (.Param "cover.hidden") | default false }}
+        {{- partial "cover.html" (dict "cxt" . "IsSingle" false "isHidden" $isHidden) }}
+        <header class="entry-header">
+          <h2 class="entry-hint-parent">
+            {{- .Title }}
+            {{- if .Draft }}
+            <span class="entry-hint" title="Draft">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960"
+                   fill="currentColor">
+                <path d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360
+                         580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0
+                         11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122
+                         -18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z"/>
+              </svg>
+            </span>
+            {{- end }}
+          </h2>
+        </header>
+        {{- if (ne (.Param "hideSummary") true) }}
+        <div class="entry-content">
+          <p>{{ .Summary | plainify | htmlUnescape }}{{ if .Truncated }}...{{ end }}</p>
+        </div>
+        {{- end }}
+        {{- if not (.Param "hideMeta") }}
+        <footer class="entry-footer">
+          {{- partial "post_meta.html" . -}}
+        </footer>
+        {{- end }}
+        <a class="entry-link" aria-label="post link to {{ .Title | plainify }}"
+           href="{{ .Permalink }}"></a>
+      </article>
+      {{- end }}
+    </div>
+
+  </section>
+  {{- end }}
+  {{- end }}
+</div>
+
+<noscript>
+  <style>
+    .tax-group { display: block !important; }
+    .tax-group .post-entry { opacity: 1 !important; transform: none !important; }
+  </style>
+</noscript>
+
+<script>
+(function () {
+  var filter = document.getElementById('tax-filter');
+  var stage  = document.getElementById('tax-stage');
+  if (!filter || !stage) return;
+
+  function activate(term) {
+    /* ── Update buttons ── */
+    filter.querySelectorAll('.tax-btn').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-term') === term);
+      b.setAttribute('aria-pressed', b.getAttribute('data-term') === term ? 'true' : 'false');
+    });
+
+    /* ── Show / hide groups ── */
+    stage.querySelectorAll('.tax-group').forEach(function (g) {
+      var on = g.getAttribute('data-group') === term;
+      g.classList.toggle('active', on);
+
+      if (on) {
+        /* Staggered card reveal */
+        var cards = g.querySelectorAll('.post-entry');
+        cards.forEach(function (c) { c.classList.remove('revealed'); });
+        /* force reflow so remove + re-add triggers transition */
+        void g.offsetWidth;
+        cards.forEach(function (c, i) {
+          setTimeout(function () { c.classList.add('revealed'); }, i * 90 + 30);
+        });
+      }
+    });
+  }
+
+  filter.addEventListener('click', function (e) {
+    var btn = e.target.closest('.tax-btn');
+    if (!btn || btn.classList.contains('active')) return;
+    activate(btn.getAttribute('data-term'));
+  });
+
+  /* Keyboard: arrow-key navigation between buttons */
+  filter.addEventListener('keydown', function (e) {
+    var btns = Array.prototype.slice.call(filter.querySelectorAll('.tax-btn'));
+    var idx  = btns.indexOf(document.activeElement);
+    if (idx === -1) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      btns[(idx + 1) % btns.length].focus();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      btns[(idx - 1 + btns.length) % btns.length].focus();
+    }
+  });
+
+  /* Auto-select: hash target or first term */
+  var hashTerm = decodeURIComponent(window.location.hash.slice(1));
+  var matched = false;
+  if (hashTerm) {
+    var btns = filter.querySelectorAll('.tax-btn');
+    for (var i = 0; i < btns.length; i++) {
+      if (btns[i].getAttribute('data-term') === hashTerm) {
+        activate(hashTerm);
+        matched = true;
+        break;
+      }
+    }
+  }
+  if (!matched) {
+    var first = filter.querySelector('.tax-btn');
+    if (first) activate(first.getAttribute('data-term'));
+  }
+})();
+</script>
+
+{{- end }}
+{{- end }}{{- /* end main */ -}}
