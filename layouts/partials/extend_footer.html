@@ -208,12 +208,17 @@
         a.hasAttribute('download')) return;
     if (a.pathname === location.pathname && a.hash) return;
     if (/\/search\/?$/.test(a.pathname)) return;
+    if (/\/search\/?$/.test(location.pathname)) return;
 
     e.preventDefault();
     doNav(a.href, false);
   });
 
   window.addEventListener('popstate', function () {
+    if (/\/search\/?$/.test(location.pathname)) {
+      window.location.reload();
+      return;
+    }
     doNav(location.href, true);
   });
 
