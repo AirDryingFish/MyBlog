@@ -477,7 +477,8 @@ body {
   border-radius: 0 0 12px 12px !important; /* 顶部圆角交给 header */
   border: 1px solid var(--border);
   position: relative;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-top: 0 !important;
 }
 .post-content pre::before {
