@@ -27,7 +27,7 @@ buildExpired = false
   ShowShareButtons = false
   ShowPostNavLinks = true
   ShowBreadCrumbs = true
-  ShowCodeCopyButtons = true
+  ShowCodeCopyButtons = false
   ShowWordCount = true
   ShowRssButtonInSectionTermList = false
   UseHugoToc = true
@@ -103,6 +103,11 @@ buildExpired = false
     style = "dracula"
   [markup.goldmark.renderer]
     unsafe = true
+  [markup.goldmark.extensions.passthrough]
+    enable = true
+    [markup.goldmark.extensions.passthrough.delimiters]
+      block  = [["$$", "$$"], ["\\[", "\\]"]]
+      inline = [["$", "$"],   ["\\(", "\\)"]]
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]
