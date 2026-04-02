@@ -187,3 +187,31 @@ void createVertexBuffer()
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 ```
+
+## Index Buffer 索引缓冲区
+Index Buffer解决的是***顶点数据重复***的问题。用矩形来理解，一个矩形有4个顶点，但GPU只认三角形，因此得把矩形拆分为2个三角形来画。
+
+* 没有Index Buffer的时候，Vertex Buffer要存6个顶点：
+```
+三角形1: V0, V1, V2
+三角形2: V2, V1, V3
+
+Vertex Buffer: [V0, V1, V2, V2, V1, V3]  // 6个顶点
+
+```
+其中$V1$、$V2$存了两边。对于矩阵这只是多了2个顶点，但是每个顶点可能包含位置(`vec3`)、法线(`vec2`)、UV(`vec2`)、切线(`vec4`)等数据，加起来可能有48字节甚至更多。
+
+* 加入Index Buffer后：
+Vertex只存4个不重复的顶点，然后用一个整数数组(Index Buffer)来告诉GPU"按什么顺序来组装三角形"：
+```
+Vertex Buffer: [V0, V1, V2, V3]  // 4个顶点，无重复
+Index Buffer:  [0, 1, 2, 2, 1, 3] // 6个索引，每个索引就是一个整数
+```
+GPU画第一个三角形时，去Vertex Buffer里去0、1、2号顶点；画第二个三角形时，取2、1、3号顶点。顶点没有重复，只是多了6个整数(`uint_16`或者`uint_32`，2~4字节)的开销。
+
+### 创建流程
+`createIndexBuffer`的逻辑和`createVertexBuffer`走的是同一套 staging buffer 模式：
+1. 在 CPU 可见的内存上创建一个临时的 staging buffer (`HOST_VISIBLE`)，把 `indices` 数组通过 `memcpy` 写进去。这块内存 CPU 能直接访问，但 GPU 读取它速度慢
+2. 在 GPU 本地显存上创建正式的 index buffer (`DEVICE_LOCAL`)。这块内存 GPU 读取极快，但 CPU 不能直接写。
+3. 用 `copyBuffer` 发一条 GPU命令，把数据从 staging buffer 拷贝到 devicel local 的 index buffer。
+4. 销毁 staging buffer

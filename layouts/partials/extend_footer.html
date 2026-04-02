@@ -17,15 +17,27 @@
     }
     var ccPath = cc.querySelector('path');
     var isHover = false;
-    var inPre = false;
+    var sbHide = false;
+    var mDown = false;
 
     document.addEventListener('mousemove', function (e) {
-      inPre = !!e.target.closest('pre');
-      cc.style.display = inPre ? 'none' : '';
+      if (sbHide) { sbHide = false; }
+      cc.style.display = '';
       cc.style.left = e.clientX + 'px';
       cc.style.top = e.clientY + 'px';
       sessionStorage.setItem('_cp', JSON.stringify([e.clientX, e.clientY, isHover ? 1 : 0]));
     });
+
+    document.addEventListener('mousedown', function () { mDown = true; });
+    document.addEventListener('mouseup', function () { mDown = false; });
+    document.addEventListener('scroll', function (e) {
+      var t = e.target;
+      if (mDown && !sbHide && t && t !== document && t.closest &&
+          (t.closest('pre') || t.closest('.highlight'))) {
+        sbHide = true;
+        cc.style.display = 'none';
+      }
+    }, true);
 
     document.addEventListener('mouseover', function (e) {
       var t = e.target.closest('a,button,[role="button"],label,summary,select,.post-entry,input[type="submit"],input[type="button"],.tax-btn');
@@ -36,7 +48,7 @@
       if (t && isHover) { isHover = false; ccPath.setAttribute('fill', NORMAL); }
     });
     document.addEventListener('mouseleave', function () { cc.style.display = 'none'; });
-    document.addEventListener('mouseenter', function () { if (!inPre) cc.style.display = ''; });
+    document.addEventListener('mouseenter', function () { if (!sbHide) cc.style.display = ''; });
   }
 
   /* ══════════════════════════════════════════
