@@ -46,5 +46,6 @@
       ]
     }
   ],
-  "frontMatter.preview.host": "http://localhost:1313/posts"
+  "frontMatter.preview.host": "http://localhost:1313/posts",
+  "frontMatter.content.publicFolder": "static"
 }
