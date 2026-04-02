@@ -9,7 +9,8 @@
       "Bash(grep -r \"sticky\\\\|\\\\.header\" E:/blog/MyBlog/themes/PaperMod/ --include=*.html)",
       "WebFetch(domain:blog.cosine.ren)",
       "Bash(mkdir -p static/images)",
-      "Bash(mv \"content/posts/101765a2-b709-4f9a-b9f7-28f19107e486.png\" \"static/images/\")"
+      "Bash(mv \"content/posts/101765a2-b709-4f9a-b9f7-28f19107e486.png\" \"static/images/\")",
+      "Bash(hugo gen:*)"
     ]
   }
 }

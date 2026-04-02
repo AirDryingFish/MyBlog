@@ -48,7 +48,7 @@ buildExpired = false
 
   [[params.socialIcons]]
     name = "github"
-    url = "https://github.com/your-username"
+    url = "https://github.com/AirDryingFish"
 
   [params.cover]
     hidden = false
