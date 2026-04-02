@@ -1,7 +1,7 @@
 ---
 title: "🐍 Python 学习笔记 #1：从零开始"
 date: 2026-03-29
-draft: false
+draft: true
 tags:
     - Python
     - 编程

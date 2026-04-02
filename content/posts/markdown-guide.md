@@ -1,10 +1,14 @@
 ---
-title: "📝 Markdown 语法速查手册"
+title: 📝 Markdown 语法速查手册
 date: 2026-03-30
-draft: false
-tags: ["Markdown", "工具", "教程"]
-categories: ["技术学习"]
-summary: "写博客必备的 Markdown 语法，5 分钟快速上手 ✦"
+draft: true
+tags:
+    - Markdown
+    - 工具
+    - 教程
+categories:
+    - 技术学习
+summary: 写博客必备的 Markdown 语法，5 分钟快速上手 ✦
 showtoc: true
 ---
 
