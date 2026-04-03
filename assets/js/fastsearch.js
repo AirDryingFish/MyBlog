@@ -6,6 +6,49 @@ let sInput = document.getElementById('searchInput');
 let first, last, current_elem = null
 let resultsAvailable = false;
 
+// Escape HTML for safe innerHTML insertion
+function esc(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Wrap Fuse.js match indices with <mark> tags
+function highlight(str, indices) {
+    if (!indices || !indices.length) return esc(str);
+    let out = '', pos = 0;
+    for (const [s, e] of indices) {
+        out += esc(str.slice(pos, s));
+        out += '<mark>' + esc(str.slice(s, e + 1)) + '</mark>';
+        pos = e + 1;
+    }
+    return out + esc(str.slice(pos));
+}
+
+// Extract a short snippet around the first match, with highlighting applied
+function getSnippet(str, indices, radius) {
+    radius = radius || 90;
+    if (!str) return '';
+    if (!indices || !indices.length) {
+        return esc(str.slice(0, 180)) + (str.length > 180 ? '…' : '');
+    }
+    const [s0, e0] = indices[0];
+    const start = Math.max(0, s0 - radius);
+    const end   = Math.min(str.length, e0 + radius + 1);
+    let out = start > 0 ? '…' : '', pos = start;
+    for (const [s, e] of indices) {
+        if (s >= end) break;
+        if (e < start) continue;
+        const cs = Math.max(s, start), ce = Math.min(e + 1, end);
+        out += esc(str.slice(pos, cs));
+        out += '<mark>' + esc(str.slice(cs, ce)) + '</mark>';
+        pos = ce;
+    }
+    out += esc(str.slice(pos, end));
+    if (end < str.length) out += '…';
+    return out;
+}
+
 // Load index immediately — don't wait for window.onload which is blocked by
 // slow external resources (fonts, analytics, etc.)
 (function initSearch() {
@@ -19,6 +62,7 @@ let resultsAvailable = false;
                         distance: 100,
                         threshold: 0.4,
                         ignoreLocation: true,
+                        includeMatches: true,
                         keys: [
                             'title',
                             'permalink',
@@ -30,7 +74,7 @@ let resultsAvailable = false;
                         options = {
                             isCaseSensitive: params.fuseOpts.iscasesensitive ?? false,
                             includeScore: params.fuseOpts.includescore ?? false,
-                            includeMatches: params.fuseOpts.includematches ?? false,
+                            includeMatches: params.fuseOpts.includematches ?? true,
                             minMatchCharLength: params.fuseOpts.minmatchcharlength ?? 1,
                             shouldSort: params.fuseOpts.shouldsort ?? true,
                             findAllMatches: params.fuseOpts.findallmatches ?? false,
@@ -83,8 +127,32 @@ sInput.onkeyup = function (e) {
             let resultSet = '';
 
             for (let item in results) {
-                resultSet += `<li class="post-entry"><header class="entry-header">${results[item].item.title}&nbsp;»</header>` +
-                    `<a href="${results[item].item.permalink}" aria-label="${results[item].item.title}"></a></li>`
+                const r = results[item];
+
+                // Build key → indices map from Fuse match data
+                const mIdx = {};
+                (r.matches || []).forEach(m => { mIdx[m.key] = m.indices; });
+
+                // Title with match highlights
+                const titleHtml = highlight(r.item.title, mIdx['title']);
+
+                // Content snippet: prefer a match in body content, then summary
+                let bodyHtml = '';
+                if (mIdx['content'] && r.item.content) {
+                    bodyHtml = getSnippet(r.item.content, mIdx['content']);
+                } else if (mIdx['summary'] && r.item.summary) {
+                    bodyHtml = getSnippet(r.item.summary, mIdx['summary']);
+                } else if (r.item.summary) {
+                    const s = r.item.summary;
+                    bodyHtml = esc(s.slice(0, 180)) + (s.length > 180 ? '…' : '');
+                }
+
+                resultSet +=
+                    `<li class="post-entry revealed">` +
+                    `<header class="entry-header">${titleHtml}&nbsp;»</header>` +
+                    (bodyHtml ? `<div class="entry-content"><p>${bodyHtml}</p></div>` : '') +
+                    `<a href="${esc(r.item.permalink)}" aria-label="${esc(r.item.title)}"></a>` +
+                    `</li>`;
             }
 
             resList.innerHTML = resultSet;

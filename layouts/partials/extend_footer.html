@@ -112,6 +112,8 @@
   /* ══════════════════════════════════════════
      3. initPage — 每次内容变化后重新初始化
      ══════════════════════════════════════════ */
+  var tocScrollFn = null; /* single slot for the TOC scroll listener */
+
   function initPage() {
     /* Code Block Header — language label + copy button */
     var ICON_COPY = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
@@ -251,9 +253,9 @@
               ts.scrollTo({ top: lt - sh / 3, behavior: 'smooth' });
           }
         }
-        window.addEventListener('scroll', function tocScroll() {
-          requestAnimationFrame(upToc);
-        });
+        if (tocScrollFn) window.removeEventListener('scroll', tocScrollFn);
+        tocScrollFn = function () { requestAnimationFrame(upToc); };
+        window.addEventListener('scroll', tocScrollFn);
         upToc();
       }
     }
@@ -318,9 +320,11 @@
       var nMenu = doc.getElementById('menu');
       if (nMenu) document.getElementById('menu').innerHTML = nMenu.innerHTML;
 
-      var oldToc = document.getElementById('toc-sidebar');
+      /* Remove every #toc-sidebar in the current document — there may be one
+         inside main.main (from innerHTML assignment) AND one left over from a
+         previous navigation that was placed after main.main. */
+      document.querySelectorAll('#toc-sidebar').forEach(function (el) { el.remove(); });
       var newToc = doc.getElementById('toc-sidebar');
-      if (oldToc) oldToc.remove();
       if (newToc) {
         var main = document.querySelector('main.main');
         if (main) main.insertAdjacentElement('afterend', newToc);

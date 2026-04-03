@@ -476,6 +476,146 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════
+   TAG CLOUD (/tags/ page) — floating bubbles
+   ═══════════════════════════════════════════════════ */
+.tag-cloud {
+  position: relative;
+  width: 100%;
+  height: clamp(400px, 62vh, 680px);
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse 55% 50% at 28% 38%, rgba(123,119,255,0.05) 0%, transparent 100%),
+    radial-gradient(ellipse 45% 50% at 72% 62%, rgba(0,229,255,0.04) 0%, transparent 100%);
+}
+
+/* Color palette via --c index */
+.tag-cloud-item { --tag-color: var(--a1); }
+.tag-cloud-item[style*="--c:1"] { --tag-color: var(--a2); }
+.tag-cloud-item[style*="--c:2"] { --tag-color: var(--a3); }
+.tag-cloud-item[style*="--c:3"] { --tag-color: var(--a4, #3dffa0); }
+
+.tag-cloud-item {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  --bsz: calc(68px + var(--w, 0) * 72px);
+  width: var(--bsz);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  font-size: calc(0.82rem + var(--w, 0) * 0.88rem);
+  font-weight: calc(600 + var(--w, 0) * 200);
+  line-height: 1.2;
+  color: var(--tag-color);
+  text-decoration: none;
+  white-space: nowrap;
+  background:
+    radial-gradient(circle at 50% 55%,
+      color-mix(in srgb, var(--tag-color) 14%, transparent) 0%,
+      color-mix(in srgb, var(--tag-color) 5%, transparent) 65%,
+      transparent 100%);
+  border: 1px solid color-mix(in srgb, var(--tag-color) 20%, transparent);
+  box-shadow:
+    inset 0 -8px 16px -6px color-mix(in srgb, var(--tag-color) 8%, transparent),
+    0 2px 12px color-mix(in srgb, var(--tag-color) 10%, transparent);
+  will-change: transform;
+  scale: 1;
+  transition:
+    scale       0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow  0.35s ease,
+    border-color 0.3s ease;
+  animation:
+    tc-in    0.6s ease forwards,
+    tc-orbit var(--dur, 14s) ease-in-out infinite;
+}
+
+/* Breathing ring — pulsing glow around each bubble */
+.tag-cloud-item::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--tag-color) 35%, transparent);
+  pointer-events: none;
+  animation: tc-breathe 3.5s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 280ms);
+}
+
+.tag-cloud-item sup {
+  position: absolute;
+  bottom: 14%; right: 22%;
+  font-size: 0.6em;
+  opacity: 0;
+  font-weight: 500;
+  color: var(--tag-color);
+  transition: opacity 0.25s ease;
+}
+
+/* Hover — pause orbit, scale in-place via `scale` property */
+.tag-cloud-item:hover {
+  animation-play-state: paused, paused;
+  scale: 1.22;
+  border-color: color-mix(in srgb, var(--tag-color) 55%, transparent);
+  box-shadow:
+    inset 0 -8px 16px -6px color-mix(in srgb, var(--tag-color) 14%, transparent),
+    0 6px 28px color-mix(in srgb, var(--tag-color) 28%, transparent),
+    0 0 50px color-mix(in srgb, var(--tag-color) 14%, transparent);
+  z-index: 10;
+}
+
+.tag-cloud-item:hover::after {
+  animation-play-state: paused;
+  opacity: 0.8;
+  border-color: color-mix(in srgb, var(--tag-color) 50%, transparent);
+}
+
+.tag-cloud-item:hover sup { opacity: 1; }
+
+.tag-cloud-item:active {
+  scale: 0.92;
+  transition-duration: 0.1s;
+}
+
+/* Entrance — pop in from small */
+@keyframes tc-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Irregular closed-loop orbit (GPU composited) */
+@keyframes tc-orbit {
+  0%   { transform: translate(-50%, -50%) translate3d(0, 0, 0); }
+  20%  { transform: translate(-50%, -50%) translate3d(var(--tx, 20px), calc(var(--ty, 15px) * -0.7), 0); }
+  45%  { transform: translate(-50%, -50%) translate3d(calc(var(--tx, 20px) * 0.3), calc(var(--ty, 15px) * -1), 0); }
+  65%  { transform: translate(-50%, -50%) translate3d(calc(var(--tx, 20px) * -0.9), calc(var(--ty, 15px) * -0.4), 0); }
+  85%  { transform: translate(-50%, -50%) translate3d(calc(var(--tx, 20px) * -0.5), calc(var(--ty, 15px) * 0.3), 0); }
+  100% { transform: translate(-50%, -50%) translate3d(0, 0, 0); }
+}
+
+/* Breathing ring pulse */
+@keyframes tc-breathe {
+  0%, 100% { opacity: 0.12; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(1.1); }
+}
+
+@media (max-width: 768px) {
+  .tag-cloud { height: clamp(320px, 52vh, 480px); border-radius: 14px; }
+  .tag-cloud-item {
+    --bsz: calc(52px + var(--w, 0) * 52px);
+    font-size: calc(0.7rem + var(--w, 0) * 0.6rem);
+  }
+}
+
+@media (prefers-reduced-motion) {
+  .tag-cloud-item { animation: tc-in 0.3s ease forwards; }
+  .tag-cloud-item::after { animation: none; opacity: 0.3; }
+}
+
+/* ═══════════════════════════════════════════════════
    LAYOUT — TIGHTER SPACING
    ═══════════════════════════════════════════════════ */
 .page-header,
@@ -513,8 +653,10 @@ body {
   line-height: 1.3;
 }
 
-/* Page entrance */
-main.main {
+/* Page entrance — applied to children, not main.main itself.
+   Applying transform on main.main would make it a containing block for
+   position:fixed descendants (the sidebar TOC), breaking its placement. */
+main.main > *:not(#toc-sidebar) {
   animation: page-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes page-in {
@@ -1046,6 +1188,125 @@ main.main {
 }
 
 /* ═══════════════════════════════════════════════════
+   SEARCH — input, results, highlights
+   ═══════════════════════════════════════════════════ */
+
+/* ── Search input ── */
+#searchbox input {
+  width: 100%;
+  padding: 14px 20px 14px 48px !important;
+  font-size: 1.05rem;
+  font-weight: 500 !important;
+  font-family: inherit;
+  color: var(--primary);
+  background:
+    var(--entry)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%237b77ff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E")
+    18px center / 18px no-repeat;
+  border: 1.5px solid var(--border) !important;
+  border-radius: 14px !important;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+#searchbox input::placeholder {
+  color: var(--secondary);
+  opacity: 0.6;
+}
+
+#searchbox input:hover {
+  border-color: rgba(123, 119, 255, 0.4) !important;
+}
+
+#searchbox input:focus {
+  border-color: var(--a1) !important;
+  box-shadow:
+    0 0 0 3px rgba(123, 119, 255, 0.12),
+    0 8px 30px rgba(123, 119, 255, 0.08);
+  background-color: var(--theme);
+}
+
+/* ── Results list ── */
+#searchResults {
+  margin: 16px 0;
+  width: 100%;
+  padding: 0;
+}
+
+#searchResults li {
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 12px !important;
+  padding: 14px 18px !important;
+  margin: 10px 0;
+  position: relative;
+  font-weight: 500;
+  background: var(--entry);
+  transition: transform 0.25s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#searchResults li:hover {
+  transform: translateY(-2px);
+  border-color: rgba(123, 119, 255, 0.35);
+  box-shadow: 0 8px 24px var(--g1);
+}
+
+#searchResults li:active {
+  transition: transform 0.1s;
+  transform: scale(0.98);
+}
+
+#searchResults a {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  outline: none;
+}
+
+#searchResults .focus {
+  transform: translateY(-2px) !important;
+  border: 1.5px solid var(--a1) !important;
+  box-shadow: 0 0 0 2px rgba(123, 119, 255, 0.15), 0 8px 24px var(--g1);
+}
+
+/* ── Highlights ── */
+#searchResults mark {
+  background: rgba(123, 119, 255, 0.15);
+  color: var(--a1);
+  border-radius: 2px;
+  padding: 0 1px;
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* ── Content snippet ── */
+#searchResults .entry-content {
+  font-size: 0.85rem;
+  color: var(--secondary);
+  line-height: 1.55;
+  margin: 4px 0 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#searchResults .entry-content p { margin: 0; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  #searchbox input {
+    padding: 12px 16px 12px 42px !important;
+    font-size: 1rem;
+    border-radius: 12px !important;
+    background-position: 14px center;
+  }
+  #searchResults li { padding: 12px 14px !important; }
+}
+
+/* ═══════════════════════════════════════════════════
    SIDEBAR TOC (floating outline for articles)
    ═══════════════════════════════════════════════════ */
 .toc-sidebar {
@@ -1116,7 +1377,7 @@ main.main {
     text-decoration: none;
     font-size: 0.8rem;
     line-height: 1.55;
-    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    transition: color 0.15s;
     box-shadow: none;
   }
 

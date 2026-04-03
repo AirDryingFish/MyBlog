@@ -1,0 +1,72 @@
+{{- define "main" }}
+
+{{- if .Title }}
+<header class="page-header tax-page-header">
+  {{- partial "breadcrumbs.html" . }}
+  <h1>{{ .Title }}</h1>
+  {{- if .Description }}
+  <div class="post-description">{{ .Description | markdownify }}</div>
+  {{- end }}
+</header>
+{{- end }}
+
+{{- $terms := .Data.Terms.ByCount }}
+
+{{- if not $terms }}
+<p class="tax-empty">暂无标签。</p>
+{{- else }}
+
+{{- $maxCount := (index $terms 0).Count }}
+
+<div class="tag-cloud" id="tag-cloud">
+  {{- range $i, $t := $terms }}
+  {{- $w := 0.0 }}
+  {{- if gt $maxCount 1 }}
+    {{- $w = div (sub (float .Count) 1.0) (sub (float $maxCount) 1.0) }}
+  {{- end }}
+  {{- $c := mod $i 4 }}
+  {{- with site.GetPage (printf "/tags/%s" .Name) }}
+  <a class="tag-cloud-item" href="{{ .Permalink }}"
+     style="--w:{{ printf "%.2f" $w }};--i:{{ $i }};--c:{{ $c }}">
+    {{- .Name -}}
+    <sup>{{ $t.Count }}</sup>
+  </a>
+  {{- end }}
+  {{- end }}
+</div>
+
+<script>
+(function(){
+  var cloud = document.getElementById('tag-cloud');
+  if (!cloud) return;
+  var items = cloud.querySelectorAll('.tag-cloud-item');
+  var n = items.length;
+  if (!n) return;
+
+  var phi = (1 + Math.sqrt(5)) / 2;
+  var ga  = 2 * Math.PI * (1 - 1 / phi);
+
+  items.forEach(function(el, i) {
+    var angle = i * ga;
+    var r = Math.sqrt((i + 0.5) / n) * 0.47;
+    var x = 50 + Math.cos(angle) * r * 92;
+    var y = 50 + Math.sin(angle) * r * 84;
+    x = Math.max(7, Math.min(93, x));
+    y = Math.max(7, Math.min(93, y));
+
+    var tx = 18 + Math.random() * 35;
+    var ty = 14 + Math.random() * 28;
+    var dur = 12 + Math.random() * 16;
+
+    el.style.left = x + '%';
+    el.style.top  = y + '%';
+    el.style.setProperty('--tx', tx + 'px');
+    el.style.setProperty('--ty', ty + 'px');
+    el.style.setProperty('--dur', dur + 's');
+    el.style.animationDelay = (i * 70) + 'ms, ' + (i * 500 + Math.random() * 2000) + 'ms';
+  });
+})();
+</script>
+
+{{- end }}
+{{- end }}{{- /* end main */ -}}
